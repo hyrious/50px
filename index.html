@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>50px</title>
+  <style>
+    label {
+      user-select: none;
+      -moz-user-select: none;
+    }
+    body {
+      display: inline-grid;
+      grid-template-columns: auto 1fr;
+      grid-gap: 4px;
+    }
+    body > :nth-child(odd) {
+      text-align: right;
+    }
+    output img:hover {
+      border-radius: 5px;
+      box-shadow: 0 0 0 4px rgba(0,0,0,.2);
+    }
+    code {
+      font-size: inherit;
+      font-family: monospace, monospace;
+    }
+  </style>
+</head>
+<body>
+        <label for="input">Input:</label> <input id="input" type="file" accept="image/*">
+    <label for="width">Width(px):</label> <input id="width" type="number" value="50">
+  <label for="height">Height(px):</label> <input id="height" type="number" value="-1">
+      <label for="output">Output:</label> <output id="output"></output>
+    <label for="cmdline">CmdLine:</label> <code id="cmdline"></code>
+  <script>
+    (function(){
+      "use strict";
+      function $(sel) { return document.querySelector(sel) }
+      HTMLElement.prototype.on = HTMLElement.prototype.addEventListener;
+      HTMLElement.prototype.clear = function(){
+        while (this.firstChild) this.firstChild.remove();
+        return this;
+      };
+      Object.prototype.tap = function(f){
+        f(this);
+        return this;
+      };
+      String.prototype.inspect = function() {
+        return JSON.stringify(this);
+      };
+      function C(tag, attr = null, ...children) {
+        return Object.assign(document.createElement(tag), attr).tap(e => e.append(...children));
+      }
+      function promisify(obj, onload = 'onload') {
+        return new Promise(r => obj[onload] = r);
+      }
+      var theOriginalImage, theOriginalImageUrl, fileName;
+      async function handle() {
+        $('#output').clear();
+        var url = theOriginalImageUrl;
+        await promisify(theOriginalImage = new Image().tap(e => e.src = url));
+        var w = +$('#width').value, h = +$('#height').value,
+            r = theOriginalImage.height / theOriginalImage.width;
+        if (w > 0 && !(h > 0)) h = w * r;
+        if (h > 0 && !(w > 0)) w = h / r;
+        if (!(w > 0) && !(h > 0)) {
+          w = theOriginalImage.width;
+          h = theOriginalImage.height;
+        }
+        if (theOriginalImageUrl.startsWith('data:image/gif')) {
+          $('#output').append("not support gif yet", C('br'), theOriginalImage);
+          $('#cmdline').textContent = `gifsicle --resize ${~~w}x${~~h} -i ${fileName.inspect()} -o output.gif`;
+        } else {
+          var canvas = C('canvas');
+          var ctx = canvas.getContext('2d');
+          canvas.width = w;
+          canvas.height = h;
+          ctx.drawImage(theOriginalImage, 0, 0, w, h);
+          var img = C('img', { src: canvas.toDataURL('image/jpeg') });
+          $('#output').append(img);
+          $('#cmdline').textContent = `magick ${fileName.inspect()} --resize ${~~w}x${~~h} output.gif`;
+        }
+      }
+      $('#input').on('change', function(){
+        var file = this.files[0];
+        if (file) {
+          fileName = file.name;
+          var reader = new FileReader();
+          reader.onload = function(){
+            theOriginalImageUrl = this.result;
+            if (!theOriginalImageUrl.startsWith('data:image')) {
+              $('#output').clear();
+              $('#output').append('invalid image file');
+            } else {
+              handle();
+            }
+          };
+          reader.readAsDataURL(file);
+        } else {
+          $('#output').clear();
+          $('#output').append('invalid image file');
+        }
+      });
+      $('#width').on('change', handle);
+      $('#height').on('change', handle);
+    })();
+  </script>
+</body>
+</html>
