@@ -79,7 +79,7 @@
           ctx.drawImage(theOriginalImage, 0, 0, w, h);
           var img = C('img', { src: canvas.toDataURL('image/jpeg') });
           $('#output').append(img);
-          $('#cmdline').textContent = `magick ${fileName.inspect()} --resize ${~~w}x${~~h} output.gif`;
+          $('#cmdline').textContent = `magick ${fileName.inspect()} --resize ${~~w}x${~~h} output.jpg`;
         }
       }
       $('#input').on('change', function(){
