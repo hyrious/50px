@@ -111,7 +111,7 @@ class FiftyPixel : Form
         }
         else
             run("magick", "\"" + file + "\" -resize 50x-1 clipboard:");
-        if (showBalloonTip)
+        if (showBalloonTip && icon != null)
         {
             icon.BalloonTipText = file + " ok";
             icon.ShowBalloonTip(500);
