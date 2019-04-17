@@ -87,7 +87,7 @@ class FiftyPixel : Form
         string p = "<IMG src=\"file:///(.+)\"";
         string x = null;
         foreach (Match match in Regex.Matches(s, p))
-            if (match.Success)
+            if (match.Success && (String.IsNullOrEmpty(x) || !x.EndsWith(".gif")))
                 x = match.Groups[1].Value;
         if (!String.IsNullOrEmpty(x))
             handle(x);
