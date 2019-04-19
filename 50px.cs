@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Diagnostics;
+using System.Threading;
 class FiftyPixel : Form
 {
     [DllImport("User32.dll", CharSet = CharSet.Auto)]
@@ -115,6 +116,8 @@ class FiftyPixel : Form
         {
             icon.BalloonTipText = file + " ok";
             icon.ShowBalloonTip(500);
+            Thread t = new Thread(clearNotifications) { IsBackground = true };
+            t.Start();
         }
     }
 
@@ -124,5 +127,11 @@ class FiftyPixel : Form
         Process process = new Process { StartInfo = info };
         process.Start();
         process.WaitForExit();
+    }
+
+    private void clearNotifications() {
+        Thread.Sleep(1000);
+        icon.Visible = false;
+        icon.Visible = true;
     }
 }
