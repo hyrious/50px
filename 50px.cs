@@ -85,7 +85,7 @@ class FiftyPixel : Form
     private void doConvert()
     {
         string s = Clipboard.GetText(TextDataFormat.Html);
-        string p = "<IMG src=\"file:///(.+)\"";
+        string p = "<img src=\"file:///(.+)\"";
         string x = null;
         foreach (Match match in Regex.Matches(s, p))
             if (match.Success && (String.IsNullOrEmpty(x) || !x.EndsWith(".gif")))
